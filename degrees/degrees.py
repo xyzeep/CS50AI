@@ -22,10 +22,10 @@ def load_data(directory):
         reader = csv.DictReader(f)
         for row in reader:
             people[row["id"]] = {
-                    "name": row["name"],
-                    "birth": row["birth"],
-                    "movies": set()
-                    }
+                "name": row["name"],
+                "birth": row["birth"],
+                "movies": set()
+            }
             if row["name"].lower() not in names:
                 names[row["name"].lower()] = {row["id"]}
             else:
@@ -36,10 +36,10 @@ def load_data(directory):
         reader = csv.DictReader(f)
         for row in reader:
             movies[row["id"]] = {
-                    "title": row["title"],
-                    "year": row["year"],
-                    "stars": set()
-                    }
+                "title": row["title"],
+                "year": row["year"],
+                "stars": set()
+            }
 
     # Load stars
     with open(f"{directory}/stars.csv", encoding="utf-8") as f:
@@ -55,7 +55,7 @@ def load_data(directory):
 def main():
     if len(sys.argv) > 2:
         sys.exit("Usage: python degrees.py [directory]")
-    directory = sys.argv[1] if len(sys.argv) == 2 else "large"
+    directory = sys.argv[1] if len(sys.argv) == 2 else "small"
 
     # Load data from files into memory
     print("Loading data...")
@@ -71,7 +71,7 @@ def main():
 
     path = shortest_path(source, target)
 
-    if path is None:
+    if not path:
         print("Not connected.")
     else:
         degrees = len(path)
@@ -92,20 +92,22 @@ def shortest_path(source, target):
     If no possible path, returns None.
     """
 
+    # if the source is the target, there's no path
     if source == target:
         return []
 
-    num_explored = 0
+    num_explored = 0  # to keep track of number of actors explored
 
-    start = Node(state = source, parent = None, action = None)
+    start = Node(state=source, parent=None, action=None)
     frontier = QueueFrontier()
     frontier.add(start)
 
     # set of explored actors
     explored = set()
 
-    while True: 
+    while True:
 
+        # if frontier is empty and target is not found, there is no connection
         if frontier.empty():
             return None
 
@@ -113,11 +115,12 @@ def shortest_path(source, target):
         num_explored += 1
 
         explored.add(node.state)
-
         neighbors = neighbors_for_person(node.state)
+
+        # go they each movie and actor of the current person
         for movie, actor in neighbors:
             if actor not in explored and not frontier.contains_state(actor):
-                child = Node(state = actor, parent = node, action = movie)
+                child = Node(state=actor, parent=node, action=movie)
                 if child.state == target:
                     path = []
                     node = child
@@ -171,3 +174,4 @@ def neighbors_for_person(person_id):
 
 if __name__ == "__main__":
     main()
+
