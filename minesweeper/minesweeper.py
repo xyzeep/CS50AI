@@ -126,8 +126,8 @@ class Sentence():
         a cell is known to be a mine.
         """
         if cell in self.cells:
-            self.cells.remove(cell) # remove that cell from the set
-            self.count -= 1 # decrease the count by 1
+            self.cells.remove(cell)  # remove that cell from the set
+            self.count -= 1  # decrease the count by 1
 
     def mark_safe(self, cell):
         """
@@ -136,6 +136,7 @@ class Sentence():
         """
         if cell in self.cells:
             self.cells.remove(cell)
+
 
 class MinesweeperAI():
     """
@@ -192,8 +193,8 @@ class MinesweeperAI():
             5) add any new sentences to the AI's knowledge base
                if they can be inferred from existing knowledge
         """
-        self.moves_made.add(cell) # marks the cell as moved
-        self.mark_safe(cell) # marks the cell as safe
+        self.moves_made.add(cell)  # marks the cell as moved
+        self.mark_safe(cell)  # marks the cell as safe
 
         neighbors = set()
         known_mines_count = 0
@@ -219,10 +220,15 @@ class MinesweeperAI():
 
         self.update_knowledge()
 
+        # Printing logs
+        print(
+            f"\nAvailable Safe Cells ({len(self.safes - self.moves_made)}): ", self.safes - self.moves_made)
+        print(f"Known Mines ({len(self.mines)}): ", self.mines)
+        print("--------------------------------\n")
 
     # helper function to update the knowledge
-    def update_knowledge(self):
 
+    def update_knowledge(self):
 
         changed = True
 
@@ -235,7 +241,7 @@ class MinesweeperAI():
 
             for sentence in self.knowledge:
                 if sentence.count == 0:
-                    new_safes = new_safes.union(sentence.cells) 
+                    new_safes = new_safes.union(sentence.cells)
                     if not changed:
                         changed = True
 
@@ -246,22 +252,21 @@ class MinesweeperAI():
 
             for each in new_safes:
                 self.mark_safe(each)
-                changed = True
 
             for each in new_mines:
                 self.mark_mine(each)
-                changed = True
 
-            self.knowledge = [s for s in self.knowledge if s.cells] # keep only sentences that still have cells; remove empty sentences
+            # keep only sentences that still have cells; remove empty sentences
+            self.knowledge = [s for s in self.knowledge if s.cells]
 
             for s1 in self.knowledge:
                 for s2 in self.knowledge:
                     if s1 == s2:
                         continue
 
-                    if s2.cells < s1.cells: # if s2 is a proper subset of s1
+                    if s2.cells < s1.cells:  # if s2 is a proper subset of s1
                         new_cells = s1.cells - s2.cells
-                        if not new_cell:
+                        if not new_cells:
                             continue
 
                         new_count = s1.count - s2.count
@@ -272,9 +277,6 @@ class MinesweeperAI():
                             changed = True
 
             self.knowledge += new_sentences
-            changed = True
-
-
 
     def make_safe_move(self):
         """
@@ -286,10 +288,11 @@ class MinesweeperAI():
         and self.moves_made, but should not modify any of those values.
         """
 
-        for row in range (self.height - 1):
-            for col in range (self.width - 1):
-                if (row, col) not in self.mines and (row, col) not in self.moves_made and (row, col) in self.safes:
-                    return (row, col)
+        # a list of all the cells that are safe and have not been chosen yet
+        safe_moves = [cell for cell in self.safes if cell not in self.moves_made]
+
+        if safe_moves:
+            return random.choice(safe_moves)
 
         return None
 
@@ -299,10 +302,18 @@ class MinesweeperAI():
         Should choose randomly among cells that:
             1) have not already been chosen, and
             2) are not known to be mines
+
         """
 
-        for row in range (self.height - 1):
-            for col in range (self.width - 1):
-                if (row, col) not in self.mines and (row, col) not in self.moves_made:
-                    return (row, col)
+        # a list of all the cells that are safe and have not been chosen yet
+        available_moves = []
+        for row in range(self.height):
+            for col in range(self.width):
+                if (row, col) not in self.moves_made and (row, col) not in self.mines:
+                    available_moves.append((row, col))
+
+        if available_moves:
+            return random.choice(available_moves)
+
         return None
+
